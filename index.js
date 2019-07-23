@@ -10,11 +10,15 @@ class PoliceDataAPI extends RESTDataSource {
   async getForces() {
     return this.get(`forces`);
   }
-  async getFoceInfoById(id){
+  async getForceInfoById(id){
     return this.get(`forces/${id}`);
   }
-
-  // willSendRequest(request) {
+  async getForceInfoByName(id){
+    const force = await this.getForceInfoById(id);
+    return force.name;
+    
+  }
+  // async willSendRequest(request) {
   //   request.params.set('apiKey', this.context.apiKey);
   //   request.params.set('country', this.context.country);
   // }
@@ -31,7 +35,8 @@ const typeDefs = gql`
 
   # The "Query" type is the root of all GraphQL queries.
   type Query {
-    Forces(id: String): [Force]
+    Forces(id: String): [Force],
+    ForceName(id: String): String
   }
 `;
 
@@ -42,11 +47,14 @@ const resolvers = {
   Query: {
     Forces : async (_source, { id }, { dataSources }) => {
       if (id) {
-        const force = await dataSources.policeDataAPI.getFoceInfoById(id);
+        const force = await dataSources.policeDataAPI.getForceInfoById(id);
         return [force];
       } else {
         return await dataSources.policeDataAPI.getForces();
       }
+    },
+    ForceName: async (_source, { id }, { dataSources }) => {
+      return await dataSources.policeDataAPI.getForceInfoByName(id);    
     }
   },
 };
